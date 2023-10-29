@@ -189,7 +189,7 @@ public class TextGridTest {
 
         TextGrid.Builder builder = new TextGrid.Builder(4);
         for (int i = 0; i < 17; ++i) {
-            builder = builder.addCell(new TextGrid.BasicCellText("Cell" + i));
+            builder = builder.addCell(new TextGrid.CellText("Cell" + i));
         }
         builder.generate().show(printStream);
 
@@ -295,7 +295,7 @@ public class TextGridTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printStream = new PrintStream(out);
 
-        new TextGrid.Builder(2, enableRowAttributes, enableColumnAttributes).
+        new TextGrid.Builder(2, enableRowAttributes, enableColumnAttributes, true).
             setHorizontalAlign(right).
             setVerticalAlignment(bottom).
             setHorizontalCellPadding(1).setVerticalCellPadding(0).
