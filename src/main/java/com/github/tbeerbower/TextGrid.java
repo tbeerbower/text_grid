@@ -58,7 +58,7 @@ public class TextGrid {
         private static final CellText[] EMPTY_CELL_TEXTS = {};
 
 
-        private enum BorderCharSet {
+        public enum BorderCharSet {
             BASIC(new char[]{'+', '+', '+', '+', '+', '+', '+', '+', '+', '-', '|'}),
             HASH(new char[]{'#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}),
             HOR(new char[]{'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', ' '}),

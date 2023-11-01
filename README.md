@@ -88,4 +88,36 @@ The above code creates a text grid with the specified settings and content, and 
 +-----------+-----------+-----------+
 ```
 
-This TextGrid CLI Application is a valuable tool for creating interactive and neatly formatted text grids, suitable for various CLI applications, such as data visualization, reports, or any other use case where structured text presentation is essential.
+Here's another example using some additional features:
+```java
+TextGrid grid = new TextGrid.Builder(2).
+    setHorizontalAlign(TextGrid.HorizontalAlign.RIGHT).
+    setVerticalAlignment(TextGrid.VerticalAlign.TOP).
+    setHorizontalCellPadding(1).setVerticalCellPadding(0).
+    setBorderCharSet(TextGrid.Builder.BorderCharSet.XASCII_2).
+    addCell("one", "two", "three", "Inconsequential", "Hypothetically").
+    addCell("four", "five").
+    addCell("six", "seven", "eight").
+    addCell("nine", "ten").
+    generate();
+
+    System.out.println(grid);
+```
+The above code creates a text grid with the text aligned to the top right and a extended ascii border character set.
+
+```
+╔═════════════════╦═════════════════╗
+║             one ║            four ║
+║             two ║            five ║
+║           three ║                 ║
+║ Inconsequential ║                 ║
+║  Hypothetically ║                 ║
+╠═════════════════╬═════════════════╣
+║             six ║            nine ║
+║           seven ║             ten ║
+║           eight ║                 ║
+║                 ║                 ║
+║                 ║                 ║
+╚═════════════════╩═════════════════╝
+```
+The TextGrid utility is a valuable tool for creating interactive and neatly formatted text grids, suitable for various CLI applications, such as data visualization, reports, or any other use case where structured text presentation is essential.
