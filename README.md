@@ -1,5 +1,11 @@
 # text_grid
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Description
+
 The TextGrid utility is a Java project that provides a versatile and user-friendly way to create and display text grids in a command-line interface (CLI). It is designed to help developers and users easily generate, customize, and visualize text grids with various formatting options. The project mainly consists of two core classes: `TextGrid` and `TextEffect`, with the `TextGrid` class having several inner classes to facilitate grid creation and customization.
 
 ## Project Capabilities
