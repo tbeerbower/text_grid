@@ -162,36 +162,20 @@ TextGrid grid = builder.generate();
 System.out.println(grid);
 ```
 The above code creates a text grid with the first column colored cyan, select cells highlighted and horizontal borders.
-<style type="text/css">
-    .f0 { color: #000000; }
-    .b0 { background-color: #000000; }
-    .f9 { color: #000000; }
-    .b9 { background-color: #FFFFFF;}
-    .f9>.bold, .bold>.f9, body.f9>pre>.bold {
-        color: #000000;
-        font-weight: bold;
-    }
-    .b3 { background-color: #AA5500; }
-    .f4 { color: #0000AA; }
-    .f0 { color: #000000; }
-    .b6 { background-color: #00AAAA; }
-    span { display: inline-block; }
-</style>
 
 <pre>
-<span class="f0 b6">══════════</span>═════════════════════════════════════════
-<span class="f0 b6">   Row-0  </span>  <span class="f4 b3">Cell-0 </span>   Cell-1    Cell-2    Cell-3   
-<span class="f0 b6">══════════</span>═════════════════════════════════════════
-<span class="f0 b6">   Row-1  </span>  Cell-4    Cell-5    Cell-6    <span class="f4 b3">Cell-7 </span>  
-<span class="f0 b6">══════════</span>═════════════════════════════════════════
-<span class="f0 b6">   Row-2  </span>  Cell-8    Cell-9    Cell-10   Cell-11  
-<span class="f0 b6">══════════</span>═════════════════════════════════════════
-<span class="f0 b6">   Row-3  </span>  Cell-12   Cell-13   <span class="f4 b3">Cell-14</span>   Cell-15  
-<span class="f0 b6">══════════</span>═════════════════════════════════════════
-<span class="f0 b6">   Row-4  </span>  Cell-16             <span class="f4 b3">HELLO! </span>            
-<span class="f0 b6">══════════</span>═════════════════════════════════════════
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">══════════</span>═════════════════════════════════════════
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">   Row-0  </span>  <span style="color: #007FFF;background-color: #FFFF00;">Cell-0 </span>   Cell-1    Cell-2    Cell-3   
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">══════════</span>═════════════════════════════════════════
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">   Row-1  </span>  Cell-4    Cell-5    Cell-6    <span style="color: #007FFF;background-color: #FFFF00;">Cell-7 </span>  
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">══════════</span>═════════════════════════════════════════
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">   Row-2  </span>  Cell-8    Cell-9    Cell-10   Cell-11  
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">══════════</span>═════════════════════════════════════════
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">   Row-3  </span>  Cell-12   Cell-13   <span style="color: #007FFF;background-color: #FFFF00;">Cell-14</span>   Cell-15  
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">══════════</span>═════════════════════════════════════════
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">   Row-4  </span>  Cell-16             <span style="color: #007FFF;background-color: #FFFF00;">HELLO! </span>            
+<span style="color: #000000;background-color: #00AAAA;display: inline-block;">══════════</span>═════════════════════════════════════════
 </pre>
-
 
 
 The TextGrid utility is a valuable tool for creating interactive and neatly formatted text grids, suitable for various
