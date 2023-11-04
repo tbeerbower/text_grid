@@ -7,6 +7,17 @@
     <groupId>io.github.tbeerbower</groupId>
     <artifactId>text-grid</artifactId>
     <version>0.1-SNAPSHOT</version>
+    <name>TextGrid</name>
+    <description>The TextGrid utility is a Java project that provides a versatile and user-friendly way to create and display text grids in a command-line interface</description>
+    <url>https://github.com/tbeerbower/text_grid</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
