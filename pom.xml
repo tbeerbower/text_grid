@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.tbeerbower</groupId>
+    <groupId>org.example</groupId>
     <artifactId>text-grid</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
@@ -19,6 +19,16 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <github.global.server>github</github.global.server>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub tbeerbower Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/tbeerbower/text_grid</url>
+        </repository>
+    </distributionManagement>
 </project>
