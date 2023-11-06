@@ -244,8 +244,8 @@ public class TextGrid {
             TextEffect nameBorderEffects = new TextEffect(TextEffect.Code.BACKGROUND_PURPLE, TextEffect.Code.WHITE);
             TextEffect charEffects = new TextEffect(TextEffect.Code.BACKGROUND_CYAN, TextEffect.Code.BLACK);
             TextEffect charBorderEffects = new TextEffect(TextEffect.Code.BACKGROUND_CYAN, TextEffect.Code.WHITE);
-            Builder builder = new Builder(BorderCharSet.BASIC.chars.length + 1).
-                    setBorderCharSet(BorderCharSet.XASCII_HOR2);
+            Builder builder = new Builder(BorderCharSet.BASIC.chars.length + 1, false, true, true).
+                    setBorderCharSet(BorderCharSet.XASCII_HOR2).setHorizontalCellPadding(1);
             for (BorderCharSet set : BorderCharSet.values()) {
                 builder.addCell(nameBorderEffects, nameEffects.apply(set.name()));
                 for (char c : set.chars) {
