@@ -16,10 +16,14 @@
  */
 package io.github.tbeerbower;
 
+import java.awt.geom.Area;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -106,6 +110,7 @@ public class TextGrid {
         };
 
         private final List<Cell> cells = new ArrayList<>();
+        private final Map<String, Cell> cellMap = new HashMap<>();
         private VerticalAlign verticalAlign = VerticalAlign.CENTER;
         private HorizontalAlign horizontalAlign = HorizontalAlign.CENTER;
         private final boolean enableColumnAttributes;
@@ -121,6 +126,15 @@ public class TextGrid {
         private boolean hasBorder = true;
         private TextEffect fillEffect = null;
         private BorderCharSet borderCharSet = BorderCharSet.BASIC;
+
+        private String[][] template = null;
+
+
+        public Builder(String[][] template) {
+            this(template[0].length, false, false, false);
+            this.template = template;
+        }
+
 
         public Builder(int gridWidth) {
             this(gridWidth, true);
@@ -138,6 +152,28 @@ public class TextGrid {
             this.cellWidths = new int[gridWidth];
             this.hasBorder = hasBorder;
             IntStream.range(0, gridWidth).forEach(i -> this.cellWidths[i] = MIN_CELL_WIDTH);
+        }
+
+        public Builder putCell(String label, Cell cell) {
+            cellMap.put(label, cell);
+            adjustCellDimensions(0, 0, cell.getTextLines());
+            return this;
+        }
+
+        public Builder putCell(String label, CellText... textLines) throws IllegalArgumentException {
+            return putCell(label, new Cell(textLines));
+        }
+
+        public Builder putCell(String label, TextEffect effect, CellText... textLines) throws IllegalArgumentException {
+            return putCell(label, new Cell(effect, textLines));
+        }
+
+        public Builder putCell(String label, String... textLines) throws IllegalArgumentException {
+            return putCell(label, Arrays.stream(textLines).map(CellText::new).toArray(CellText[]::new));
+        }
+
+        public Builder putCell(String label, TextEffect effect, String... textLines) throws IllegalArgumentException {
+            return putCell(label, effect, Arrays.stream(textLines).map(CellText::new).toArray(CellText[]::new));
         }
 
         public Builder addCell(Cell cell) {
@@ -231,7 +267,118 @@ public class TextGrid {
             return this;
         }
 
+
+
+
+        private static class GridArea {
+
+            private int baseLineIndex;
+
+            private String[] lines;
+
+            private int horizontalFr;
+            private int verticalFr;
+
+
+            @Override
+            public String toString() {
+                return "GridArea{" +
+                        "baseLineIndex=" + baseLineIndex +
+                        ", horizontalFr=" + horizontalFr +
+                        ", verticalFr=" + verticalFr +
+                        ", lines=" + Arrays.toString(lines) +
+                        '}';
+            }
+        }
+
+
+
+
+
+
         public TextGrid generate() {
+
+
+
+            if (template != null) {
+                gridHeight = template.length;
+                int paddedCellWidth = getPaddedCellWidth(0);
+                int paddedCellHeight = getPaddedCellHeight(0);
+                int gridLines = paddedCellHeight * gridHeight;
+
+                Map<String, GridArea> areaMap = new HashMap<>();
+
+                for (int i = 0; i < template.length; ++i) {
+                    String[] templateLine = template[i];
+                    for (int j = 0; j < templateLine.length; ++j) {
+                        String templateLabel = templateLine[j];
+                        GridArea area = areaMap.get(templateLabel);
+                        if (area == null) {
+                            area = new GridArea();
+                            area.baseLineIndex = i;
+                            area.horizontalFr = 0;
+                            area.verticalFr = 1;
+                            for (int ii = i + 1; ii < template.length && template[ii][j].equals(templateLabel); ++ii) {
+                                area.verticalFr++;
+                            }
+                            Cell cell = cellMap.get(templateLabel);
+                            area.lines = generateCell(0, 0, paddedCellHeight, paddedCellWidth, cell.getTextLines(), cell.getFillEffect());
+                            areaMap.put(templateLabel, area);
+                        }
+                        if (i == area.baseLineIndex) {
+                            area.horizontalFr++;
+                        }
+                    }
+                }
+                for (Map.Entry<String, GridArea> entry : areaMap.entrySet()) {
+                    Cell cell = cellMap.get(entry.getKey());
+                    GridArea area = entry.getValue();
+
+                    System.out.printf("%d, %d, %s %n", paddedCellHeight * area.verticalFr, paddedCellWidth * area.horizontalFr, area);
+
+                    area.lines = generateCell(0, 0, paddedCellHeight * area.verticalFr, paddedCellWidth * area.horizontalFr, cell.getTextLines(), cell.getFillEffect());
+                }
+
+
+                List<String> gridLineList = new ArrayList<>();
+                for (int i = 0; i < gridLines; ++i) {
+
+                    int row = i / paddedCellHeight;
+
+                    StringBuilder sb = new StringBuilder();
+                    String[] templateLine = template[row];
+
+                   // System.out.printf("i=%d, row=%d, templateLine=%s %n", i, row, Arrays.toString(templateLine));
+
+
+                    String lastLabel = "";
+                    for (int j = 0; j < templateLine.length; ++j) {
+                        String templateLabel = templateLine[j];
+                        if (!templateLabel.equals(lastLabel)) {
+                            GridArea area = areaMap.get(templateLabel);
+                            int areaRow = i - (area.baseLineIndex * paddedCellHeight);
+
+                 //           System.out.printf("j=%d, templateLabel=%s, areaRow=%d, area=%s %n", j, templateLabel, areaRow, area);
+                            sb.append(area.lines[areaRow]);
+                            lastLabel = templateLabel;
+                        }
+                    }
+
+                    gridLineList.add(sb.toString());
+                }
+
+
+
+                return new TextGrid(Collections.singletonList(gridLineList.toArray(new String[]{})));
+
+  //              return new TextGrid(range(0, gridLines).mapToObj(this::generateGridLine).collect(Collectors.toList()));
+
+//                List<String[]> lines = new ArrayList<>();
+//                return new TextGrid(lines);
+            }
+
+
+
             gridHeight = cells.size() / gridWidth + (cells.size() % gridWidth == 0 ? 0 : 1);
             return new TextGrid(range(0, gridHeight).mapToObj(this::generateCellRow).collect(Collectors.toList()));
         }
@@ -266,6 +413,13 @@ public class TextGrid {
                     format("%s%s", cell1[i], cell2[i])).toArray(String[]::new))
                 .orElse(new String[0]);
         }
+
+
+        private String[] generateGridLine(int line) {
+            return new String[] {"*-----*"};
+        }
+
+
 
         private String[] generateCell(int row, int col, int height, int width, CellText[] cellText, TextEffect cellFillEffect) {
             boolean isLastCol = col == gridWidth - 1;
