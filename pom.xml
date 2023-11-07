@@ -48,10 +48,6 @@
         </dependency>
     </dependencies>
 
-
-
-
-
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

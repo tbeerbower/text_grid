@@ -18,6 +18,35 @@ package com.github.tbeerbower;
 
 public class App {
     public static void main(String[] args) {
-        System.out.println(TextGrid.Builder.displayBorderChars());
+ //       System.out.println(TextGrid.Builder.displayBorderChars());
+
+        TextEffect effectA = new TextEffect(TextEffect.Code.BACKGROUND_BLUE);
+        TextEffect effectB = new TextEffect(TextEffect.Code.BACKGROUND_RED);
+        TextEffect effectC = new TextEffect(TextEffect.Code.BACKGROUND_GREEN);
+        TextEffect effectD = new TextEffect(TextEffect.Code.BACKGROUND_PURPLE);
+        TextEffect effectE = new TextEffect(TextEffect.Code.BACKGROUND_YELLOW);
+        TextEffect effectF = new TextEffect(TextEffect.Code.BACKGROUND_CYAN);
+
+        TextGrid.Builder builder = new TextGrid.Builder( new String [][] {
+                {"a", "a", "b", "c"},
+                {"a", "a", "d", "c"},
+                {"e", "e", "e", "c"},
+                {"f", "f", "f", "f"}});
+
+        builder.setVerticalCellPadding(0).setHorizontalCellPadding(0).
+                setVerticalAlignment(TextGrid.VerticalAlign.CENTER).setHorizontalAlign(TextGrid.HorizontalAlign.CENTER).
+                setHasBorder(true);
+
+        builder.putCell("a", effectA,"This", "is", "A").
+                putCell("b", effectB,"B").
+                putCell("c", effectC,"This", "is", "C").
+                putCell("d", effectD,"D").
+                putCell("e", effectE,"This is E").
+                putCell("f", effectF,"This is FFFFF");
+
+        TextGrid grid = builder.generate();
+        System.out.println(grid);
+
+
     }
 }
