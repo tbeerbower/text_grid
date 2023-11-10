@@ -6,7 +6,7 @@
 
     <groupId>io.github.tbeerbower</groupId>
     <artifactId>text-grid</artifactId>
-    <version>0.1</version>
+    <version>0.1.1</version>
     <name>TextGrid</name>
     <description>The TextGrid utility is a Java project that provides a versatile and user-friendly way to create and display text grids in a command-line interface</description>
     <url>https://github.com/tbeerbower/text_grid</url>
