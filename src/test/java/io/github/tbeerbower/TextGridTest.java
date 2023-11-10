@@ -1,4 +1,4 @@
-package com.github.tbeerbower;
+package io.github.tbeerbower;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
