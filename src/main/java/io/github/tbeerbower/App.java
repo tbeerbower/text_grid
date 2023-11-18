@@ -26,22 +26,27 @@ public class App {
         TextEffect effectD = new TextEffect(TextEffect.Code.BACKGROUND_PURPLE);
         TextEffect effectE = new TextEffect(TextEffect.Code.BACKGROUND_YELLOW);
         TextEffect effectF = new TextEffect(TextEffect.Code.BACKGROUND_CYAN);
+        TextEffect effectG = new TextEffect(TextEffect.Code.CYAN);
+        TextEffect effectH = new TextEffect(TextEffect.Code.GREEN);
 
         TextGrid.Builder builder = new TextGrid.Builder( new String [][] {
                 {"a", "a", "b", "c"},
                 {"a", "a", "d", "c"},
                 {"e", "e", "e", "c"},
+                {"g", "g", "h", "h"},
                 {"f", "f", "f", "f"}});
 
         builder.setVerticalCellPadding(0).setHorizontalCellPadding(0).
-                setVerticalAlignment(TextGrid.VerticalAlign.CENTER).setHorizontalAlign(TextGrid.HorizontalAlign.CENTER).
-                setHasBorder(true);
+                setVerticalAlignment(TextGrid.VerticalAlign.BOTTOM).setHorizontalAlign(TextGrid.HorizontalAlign.CENTER).
+                setHasBorder(true).setBorderCharSet(TextGrid.Builder.BorderCharSet.XASCII_2);
 
         builder.putCell("a", effectA,"This", "is", "A").
                 putCell("b", effectB,"B").
                 putCell("c", effectC,"This", "is", "C").
                 putCell("d", effectD,"D").
                 putCell("e", effectE,"This is E").
+                putCell("g", effectG,"This is G").
+                putCell("h", effectH,"This is H").
                 putCell("f", effectF,"This is FFFFF");
 
         TextGrid grid = builder.generate();
