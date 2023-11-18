@@ -181,3 +181,9 @@ The above code creates a text grid with the first column colored cyan, select ce
 The TextGrid utility is a valuable tool for creating interactive and neatly formatted text grids, suitable for various
 CLI applications, such as data visualization, reports, or any other use case where structured text presentation is
 essential.
+
+
+
+
+
+

@@ -208,7 +208,7 @@ public class TextGrid {
             int index = row * gridWidth + col;
             if (index >= cells.size()) {
                 IntStream.rangeClosed(cells.size(), index).forEach(i ->
-                    cells.add(i, new Cell(new CellText[]{})));
+                    cells.add(i, new Cell()));
             }
             cells.set(index, cell);
             return this;
@@ -279,6 +279,13 @@ public class TextGrid {
             private int horizontalFr;
             private int verticalFr;
 
+            private boolean firstRow;
+            private boolean lastRow;
+            private boolean firstCol;
+            private boolean lastCol;
+
+            private int currentIndex;
+
 
             @Override
             public String toString() {
@@ -304,7 +311,6 @@ public class TextGrid {
                 gridHeight = template.length;
                 int paddedCellWidth = getPaddedCellWidth(0);
                 int paddedCellHeight = getPaddedCellHeight(0);
-                int gridLines = paddedCellHeight * gridHeight;
 
                 Map<String, GridArea> areaMap = new HashMap<>();
 
@@ -322,11 +328,22 @@ public class TextGrid {
                                 area.verticalFr++;
                             }
                             Cell cell = cellMap.get(templateLabel);
-                            area.lines = generateCell(0, 0, paddedCellHeight, paddedCellWidth, cell.getTextLines(), cell.getFillEffect());
                             areaMap.put(templateLabel, area);
                         }
                         if (i == area.baseLineIndex) {
                             area.horizontalFr++;
+                        }
+                        if ( j == 0 ) {
+                            area.firstCol = true;
+                        }
+                        if (j == templateLine.length - 1) {
+                            area.lastCol = true;
+                        }
+                        if( i == 0 ) {
+                            area.firstRow = true;
+                        }
+                        if (i == template.length -1) {
+                            area.lastRow = true;
                         }
                     }
                 }
@@ -334,37 +351,47 @@ public class TextGrid {
                     Cell cell = cellMap.get(entry.getKey());
                     GridArea area = entry.getValue();
 
-                    System.out.printf("%d, %d, %s %n", paddedCellHeight * area.verticalFr, paddedCellWidth * area.horizontalFr, area);
+                    int row = area.lastRow ? gridHeight - 1 : area.firstRow ? 0 : 1;
+                    int col = area.lastCol ? gridWidth - 1 : area.firstCol ? 0 : 1;
+                    area.lines = generateCell(row, col, paddedCellHeight * area.verticalFr + area.verticalFr - 1, paddedCellWidth * area.horizontalFr + area.horizontalFr - 1, cell.getTextLines(), cell.getFillEffect());
 
-                    area.lines = generateCell(0, 0, paddedCellHeight * area.verticalFr, paddedCellWidth * area.horizontalFr, cell.getTextLines(), cell.getFillEffect());
                 }
 
 
                 List<String> gridLineList = new ArrayList<>();
-                for (int i = 0; i < gridLines; ++i) {
+                for (int i = 0; i < template.length; ++i) {
 
-                    int row = i / paddedCellHeight;
 
-                    StringBuilder sb = new StringBuilder();
-                    String[] templateLine = template[row];
+                    String[] templateLine = template[i];
 
                    // System.out.printf("i=%d, row=%d, templateLine=%s %n", i, row, Arrays.toString(templateLine));
 
-
-                    String lastLabel = "";
+                    int linesPerRow = 0;
                     for (int j = 0; j < templateLine.length; ++j) {
                         String templateLabel = templateLine[j];
-                        if (!templateLabel.equals(lastLabel)) {
-                            GridArea area = areaMap.get(templateLabel);
-                            int areaRow = i - (area.baseLineIndex * paddedCellHeight);
-
-                 //           System.out.printf("j=%d, templateLabel=%s, areaRow=%d, area=%s %n", j, templateLabel, areaRow, area);
-                            sb.append(area.lines[areaRow]);
-                            lastLabel = templateLabel;
+                        GridArea area = areaMap.get(templateLabel);
+                        int linesLeft = area.lines.length - area.currentIndex;
+                        if (linesPerRow == 0 || linesLeft < linesPerRow) {
+                            linesPerRow = linesLeft;
                         }
                     }
 
-                    gridLineList.add(sb.toString());
+
+                    for (int rowLine = 0; rowLine < linesPerRow; ++rowLine ) {
+                        StringBuilder sb = new StringBuilder();
+
+                        String lastLabel = "";
+                        for (int j = 0; j < templateLine.length; ++j) {
+                            String templateLabel = templateLine[j];
+                            if (!templateLabel.equals(lastLabel)) {
+                                GridArea area = areaMap.get(templateLabel);
+                                //           System.out.printf("j=%d, templateLabel=%s, areaRow=%d, area=%s %n", j, templateLabel, areaRow, area);
+                                sb.append(area.lines[area.currentIndex++]);
+                                lastLabel = templateLabel;
+                            }
+                        }
+                        gridLineList.add(sb.toString());
+                    }
                 }
 
 
@@ -413,13 +440,6 @@ public class TextGrid {
                     format("%s%s", cell1[i], cell2[i])).toArray(String[]::new))
                 .orElse(new String[0]);
         }
-
-
-        private String[] generateGridLine(int line) {
-            return new String[] {"*-----*"};
-        }
-
-
 
         private String[] generateCell(int row, int col, int height, int width, CellText[] cellText, TextEffect cellFillEffect) {
             boolean isLastCol = col == gridWidth - 1;
