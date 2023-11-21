@@ -18,7 +18,7 @@ package io.github.tbeerbower;
 
 public class App {
     public static void main(String[] args) {
- //       System.out.println(TextGrid.Builder.displayBorderChars());
+//        System.out.println(TextGrid.Builder.displayBorderChars());
 
         TextEffect effectA = new TextEffect(TextEffect.Code.BACKGROUND_BLUE);
         TextEffect effectB = new TextEffect(TextEffect.Code.BACKGROUND_RED);
@@ -36,8 +36,8 @@ public class App {
                 {"g", "g", "h", "h"},
                 {"f", "f", "f", "f"}});
 
-        builder.setVerticalCellPadding(0).setHorizontalCellPadding(0).
-                setVerticalAlignment(TextGrid.VerticalAlign.BOTTOM).setHorizontalAlign(TextGrid.HorizontalAlign.CENTER).
+        builder.setVerticalCellPadding(1).setHorizontalCellPadding(2).
+                setVerticalAlignment(TextGrid.VerticalAlign.TOP).setHorizontalAlign(TextGrid.HorizontalAlign.CENTER).
                 setHasBorder(true).setBorderCharSet(TextGrid.Builder.BorderCharSet.XASCII_2);
 
         builder.putCell("a", effectA,"This", "is", "A").
