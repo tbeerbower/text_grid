@@ -267,36 +267,6 @@ public class TextGrid {
         }
 
 
-
-        private static class GridCellArea {
-            private int row;
-            private int col;
-            private int height;
-            private int width;
-            private final int paddedHeight;
-            private final int paddedWidth;
-            private CellText[] cellText;
-            private TextEffect cellFillEffect;
-
-
-            public GridCellArea(int row, int col, int height, int width, int paddedHeight, int paddedWidth, CellText[] cellText, TextEffect cellFillEffect) {
-                this.row = row;
-                this.col = col;
-                this.height = height;
-                this.width = width;
-                this.paddedHeight = paddedHeight;
-                this.paddedWidth = paddedWidth;
-                this.cellText = cellText;
-                this.cellFillEffect = cellFillEffect;
-            }
-
-
-
-        }
-
-
-
-
         private static class GridArea {
 
 
@@ -312,7 +282,7 @@ public class TextGrid {
             private boolean firstCol;
             private boolean lastCol;
 
-            private int currentIndex;
+            private int currentIndex = 0;
 
 
             @Override
@@ -399,69 +369,54 @@ public class TextGrid {
                     Cell cell = cellMap.get(entry.getKey());
                     GridArea area = entry.getValue();
 
-
-
                     int row = area.lastRow ? gridHeight - 1 : area.firstRow ? 0 : 1;
                     int col = area.lastCol ? gridWidth - 1 : area.firstCol ? 0 : 1;
-
 
                     int height = cellHeight * area.verticalFr + (hasBorder ? area.verticalFr - 1 : 0);
                     int width = cellWidth * area.horizontalFr + (hasBorder ? area.horizontalFr - 1 : 0);
                     int paddedCellHeight = height + verticalCellPadding * (2 * area.verticalFr);
                     int paddedCellWidth = width + horizontalCellPadding * (2 * area.horizontalFr);
-                    area.lines = generateCell(new GridCellArea(row, col,
-                            height,
-                            width,
-                            paddedCellHeight, paddedCellWidth,
-                            cell.getTextLines(), cell.getFillEffect()));
 
+                    cell.setCoordinates(row, col);
+                    cell.setDimensions(height, width, paddedCellHeight, paddedCellWidth);
+
+                    area.lines = generateCell(cell);
                 }
 
 
                 List<String> gridLineList = new ArrayList<>();
-                for (int i = 0; i < template.length; ++i) {
 
+                String[] lastTemplateLine = null;
 
-                    String[] templateLine = template[i];
+                for (String[] templateLine : template) {
+                    if (Arrays.compare(lastTemplateLine, templateLine) != 0) {
 
-                   // System.out.printf("i=%d, row=%d, templateLine=%s %n", i, row, Arrays.toString(templateLine));
+                        boolean isLastLine = false;
+                        while (!isLastLine) {
+                            StringBuilder sb = new StringBuilder();
 
-                    int linesPerRow = 0;
-                    for (int j = 0; j < templateLine.length; ++j) {
-                        String templateLabel = templateLine[j];
-                        GridArea area = areaMap.get(templateLabel);
-                        int linesLeft = area.lines.length - area.currentIndex;
-                        if (linesPerRow == 0 || linesLeft < linesPerRow) {
-                            linesPerRow = linesLeft;
-                        }
-                    }
-
-
-                    for (int rowLine = 0; rowLine < linesPerRow; ++rowLine ) {
-                        StringBuilder sb = new StringBuilder();
-
-                        String lastLabel = "";
-                        for (int j = 0; j < templateLine.length; ++j) {
-                            String templateLabel = templateLine[j];
-                            if (!templateLabel.equals(lastLabel)) {
-                                GridArea area = areaMap.get(templateLabel);
-                                //           System.out.printf("j=%d, templateLabel=%s, areaRow=%d, area=%s %n", j, templateLabel, areaRow, area);
-                                sb.append(area.lines[area.currentIndex++]);
-                                lastLabel = templateLabel;
+                            String lastLabel = "";
+                            for (int j = 0; j < templateLine.length; ++j) {
+                                String templateLabel = templateLine[j];
+                                if (!templateLabel.equals(lastLabel)) {
+                                    lastLabel = templateLabel;
+                                    GridArea area = areaMap.get(templateLabel);
+//                             System.out.printf("j=%d, templateLabel=%s, areaRow=%d, area=%s %n", j, templateLabel, area.currentIndex, area);
+                                    sb.append(area.lines[area.currentIndex++]);
+                                    if (area.currentIndex >= area.lines.length) {
+//                                 System.out.printf("lastLine for %s : %d%n", templateLabel, area.currentIndex);
+                                        isLastLine = true;
+                                    }
+                                }
                             }
+                            gridLineList.add(sb.toString());
                         }
-                        gridLineList.add(sb.toString());
                     }
+                    lastTemplateLine = templateLine;
                 }
-
-
 
                 return new TextGrid(Collections.singletonList(gridLineList.toArray(new String[]{})));
 
-  //              return new TextGrid(range(0, gridLines).mapToObj(this::generateGridLine).collect(Collectors.toList()));
-
-//                List<String[]> lines = new ArrayList<>();
-//                return new TextGrid(lines);
             }
 
 
@@ -494,40 +449,47 @@ public class TextGrid {
         private String[] generateCellRow(int row) {
             int height = getCellHeight(row);
             int paddedCellHeight = getPaddedCellHeight(height);
-            return range(0, gridWidth).mapToObj(col -> generateCell(new GridCellArea(row, col,
-                            height, getCellWidth(col), paddedCellHeight, getPaddedCellWidth(getCellWidth(col)), getCellText(row * gridWidth + col),
-                            getCellFillEffect(row * gridWidth + col))))
+            return range(0, gridWidth).mapToObj(col -> generateCell(updateCell(row, col, height, getCellWidth(col))))
                 .reduce((cell1, cell2) -> range(0, hasBorder ? (paddedCellHeight + (row == 0 ? 2 : 1)) : paddedCellHeight).mapToObj(i ->
                     format("%s%s", cell1[i], cell2[i])).toArray(String[]::new))
                 .orElse(new String[0]);
         }
 
-        private String[] generateCell(GridCellArea area) {
-            boolean isLastCol = area.col == gridWidth - 1;
+        private Cell updateCell(int row, int col, int height, int width) {
+            int index = row * gridWidth + col;
+            Cell cell = index < cells.size() ? cells.get(index) : new Cell(null, EMPTY_CELL_TEXTS);
+            cell.setCoordinates(row, col);
+            cell.setDimensions(height, width, getPaddedCellHeight(height), getPaddedCellWidth(width));
+            return cell;
+        }
+
+        private String[] generateCell(Cell cell) {
+            boolean isLastCol = cell.col == gridWidth - 1;
             if (hasBorder) {
-                return generateCellWithBorders(area, isLastRow(area.row), isLastCol);
+                return generateCellWithBorders(cell, isLastRow(cell.row), isLastCol);
             }
-            Stream<String> centerStream = range(0, area.paddedHeight).mapToObj(textRow ->
-                    format("%s", getDisplayText(textRow, area)));
+            Stream<String> centerStream = range(0, cell.paddedHeight).mapToObj(textRow ->
+                    format("%s", getDisplayText(textRow, cell)));
 
             return (of(centerStream)).flatMap(Function.identity()).toArray(String[]::new);
         }
 
-        private String[] generateCellWithBorders(GridCellArea area, boolean isLastRow, boolean isLastCol) {
-            boolean isFirstRow = area.row == 0;
-            boolean ifFirstCol = area.col == 0;
+        private String[] generateCellWithBorders(Cell cell, boolean isLastRow, boolean isLastCol) {
+            boolean isFirstRow = cell.row == 0;
+            boolean ifFirstCol = cell.col == 0;
 
-            String topLeftChar = cornerChar(area.cellFillEffect, true, true, isFirstRow, isLastRow, ifFirstCol, isLastCol);
-            String bottomLeftChar = cornerChar(area.cellFillEffect, false, true, isFirstRow, isLastRow, ifFirstCol, isLastCol);
-            String topRightChar = cornerChar(area.cellFillEffect, true, false, isFirstRow, isLastRow, ifFirstCol, isLastCol);
-            String bottomRightChar = cornerChar(area.cellFillEffect, false, false, isFirstRow, isLastRow, ifFirstCol, isLastCol);
-            String verticalChar = verticalChar(area.cellFillEffect);
-            String horizontalChar = horizontalChar(area.cellFillEffect);
+            TextEffect cellFillEffect = cell.getFillEffect();
+            String topLeftChar = cornerChar(cellFillEffect, true, true, isFirstRow, isLastRow, ifFirstCol, isLastCol);
+            String bottomLeftChar = cornerChar(cellFillEffect, false, true, isFirstRow, isLastRow, ifFirstCol, isLastCol);
+            String topRightChar = cornerChar(cellFillEffect, true, false, isFirstRow, isLastRow, ifFirstCol, isLastCol);
+            String bottomRightChar = cornerChar(cellFillEffect, false, false, isFirstRow, isLastRow, ifFirstCol, isLastCol);
+            String verticalChar = verticalChar(cellFillEffect);
+            String horizontalChar = horizontalChar(cellFillEffect);
 
-            String top = format("%s%s%s", topLeftChar, horizontalChar.repeat(area.paddedWidth), isLastCol ? topRightChar : "");
-            String bottom = format("%s%s%s", bottomLeftChar, horizontalChar.repeat(area.paddedWidth), isLastCol ? bottomRightChar : "");
-            Stream<String> centerStream = range(0, area.paddedHeight).mapToObj(textRow ->
-                    format("%s%s%s", verticalChar, getDisplayText(textRow, area), isLastCol ? verticalChar : ""));
+            String top = format("%s%s%s", topLeftChar, horizontalChar.repeat(cell.paddedWidth), isLastCol ? topRightChar : "");
+            String bottom = format("%s%s%s", bottomLeftChar, horizontalChar.repeat(cell.paddedWidth), isLastCol ? bottomRightChar : "");
+            Stream<String> centerStream = range(0, cell.paddedHeight).mapToObj(textRow ->
+                    format("%s%s%s", verticalChar, getDisplayText(textRow, cell), isLastCol ? verticalChar : ""));
 
             return (isFirstRow ?
                     of(of(top), centerStream, of(bottom)) : of(centerStream, of(bottom))).
@@ -547,20 +509,12 @@ public class TextGrid {
             for (boolean bit : bits) {
                 key = (key << 1) + (bit ? 1 : 0);
             }
-            return applyEffect(cellFillEffect, String.valueOf(borderCharSet.get(CORNER_CODES[key])));
+            return applyEffect(cellFillEffect, borderCharSet.get(CORNER_CODES[key]));
         }
 
         private String applyEffect(TextEffect cellFillEffect, String cc) {
             TextEffect effect = cellFillEffect == null ? fillEffect : cellFillEffect;
             return effect == null ? cc : effect.apply(cc);
-        }
-
-        private CellText[] getCellText(int index) {
-            return index < cells.size() ? cells.get(index).getTextLines() : EMPTY_CELL_TEXTS;
-        }
-
-        private TextEffect getCellFillEffect(int index) {
-            return index < cells.size() ? cells.get(index).getFillEffect() : null;
         }
 
         private int getCellHeight(int row) {
@@ -592,29 +546,35 @@ public class TextGrid {
             cellHeights[row] = Math.min(maxCellHeight, Math.max(cellHeights[row], textLines.length));
         }
 
-        private String getDisplayText(int textRow, GridCellArea area) {
-            int cellTextLength = Math.min(area.cellText.length, area.paddedHeight - verticalCellPadding * 2);
-            if (area.cellText.length < area.paddedHeight && verticalAlign != VerticalAlign.TOP) {
+        private String getDisplayText(int textRow, Cell cell) {
+
+            CellText[] textLines = cell.getTextLines();
+            TextEffect cellFillEffect = cell.getFillEffect();
+            int cellTextLength = Math.min(textLines.length, cell.paddedHeight - verticalCellPadding * 2);
+            if (textLines.length < cell.paddedHeight && verticalAlign != VerticalAlign.TOP) {
                 textRow -= verticalAlign == VerticalAlign.CENTER ?
-                    Math.ceil((area.paddedHeight - (cellTextLength + verticalCellPadding)) / 2.0) :
-                        area.paddedHeight - (cellTextLength + verticalCellPadding);
+                    Math.ceil((cell.paddedHeight - (cellTextLength + verticalCellPadding)) / 2.0) :
+                        cell.paddedHeight - (cellTextLength + verticalCellPadding);
             } else {
                 textRow -= verticalCellPadding;
             }
-            TextEffect effect = area.cellFillEffect == null ? fillEffect : area.cellFillEffect;
-            String fill = effect == null ? " ".repeat(area.paddedWidth) : effect.apply(" ".repeat(area.paddedWidth));
+            TextEffect effect = cellFillEffect == null ? fillEffect : cellFillEffect;
+            String fill = effect == null ? " ".repeat(cell.paddedWidth) : effect.apply(" ".repeat(cell.paddedWidth));
 
-            return (textRow >= 0 && textRow < area.paddedHeight && textRow < cellTextLength) ?
-                getDisplayText(textRow, area, area.paddedWidth) : fill;
+            return (textRow >= 0 && textRow < cell.paddedHeight && textRow < cellTextLength) ?
+                getDisplayText(textRow, cell, cell.paddedWidth) : fill;
         }
 
-        private String getDisplayText(int row, GridCellArea area, int paddedCellWidth) {
-            CellText cellText = area.cellText[row];
+        private String getDisplayText(int row, Cell cell, int paddedCellWidth) {
+            CellText[] textLines = cell.getTextLines();
+            TextEffect cellFillEffect = cell.getFillEffect();
+
+            CellText cellText = textLines[row];
             int textWidth = paddedCellWidth - horizontalCellPadding * 2;
-            TextEffect effect = area.cellFillEffect == null ? fillEffect : area.cellFillEffect;
+            TextEffect effect = cellFillEffect == null ? fillEffect : cellFillEffect;
             String fill = effect == null ? " ".repeat(horizontalCellPadding) :
                     effect.apply(" ".repeat(horizontalCellPadding));
-            return String.format("%s%s%s", fill, cellText.getDisplayText(textWidth, horizontalAlign, area.cellFillEffect), fill);
+            return String.format("%s%s%s", fill, cellText.getDisplayText(textWidth, horizontalAlign, cellFillEffect), fill);
         }
 
         private boolean isLastRow(int row) {
@@ -627,6 +587,12 @@ public class TextGrid {
     public static class Cell {
         private final CellText[] textLines;
         private final TextEffect fillEffect;
+        private int row;
+        private int col;
+        private int height;
+        private int width;
+        private int paddedHeight;
+        private int paddedWidth;
 
         public Cell(CellText... textLines) {
             this(null, textLines);
@@ -643,6 +609,18 @@ public class TextGrid {
 
         public TextEffect getFillEffect() {
             return fillEffect;
+        }
+
+        public void setCoordinates(int row, int col) {
+            this.row = row;
+            this.col = col;
+        }
+
+        public void setDimensions(int height, int width, int paddedHeight, int paddedWidth) {
+            this.height = height;
+            this.width = width;
+            this.paddedHeight = paddedHeight;
+            this.paddedWidth = paddedWidth;
         }
     }
     

@@ -16,9 +16,11 @@
  */
 package io.github.tbeerbower;
 
+import java.util.Arrays;
+
 public class App {
     public static void main(String[] args) {
-//        System.out.println(TextGrid.Builder.displayBorderChars());
+        System.out.println(TextGrid.Builder.displayBorderChars());
 
         TextEffect effectA = new TextEffect(TextEffect.Code.BACKGROUND_BLUE);
         TextEffect effectB = new TextEffect(TextEffect.Code.BACKGROUND_RED);
@@ -50,6 +52,75 @@ public class App {
                 putCell("f", effectF,"This is FFFFF");
 
         TextGrid grid = builder.generate();
+        System.out.println(grid);
+
+
+
+        TextEffect effectLY = new TextEffect(TextEffect.Code.BACKGROUND_BLUE);
+        TextEffect effectLX = new TextEffect(TextEffect.Code.BACKGROUND_RED);
+        TextEffect effectNe = new TextEffect(TextEffect.Code.BACKGROUND_GREEN);
+        TextEffect effectMi = new TextEffect(TextEffect.Code.BACKGROUND_PURPLE);
+        TextEffect effectWe = new TextEffect(TextEffect.Code.BACKGROUND_YELLOW);
+        TextEffect effectSo = new TextEffect(TextEffect.Code.BACKGROUND_CYAN);
+        TextEffect effectBl = new TextEffect(TextEffect.Code.CYAN);
+
+
+        int nePop = 57;
+        int miPop = 69;
+        int wePop = 79;
+        int soPop = 126;
+        double max = 130.0;
+
+        String [][] template = new String[15][14];
+        String yLabel = "Population";
+
+        for (int i = 0; i < template.length - 1; i++) {
+            String[] row = template[i];
+            double level = 1.0 - (i / (double)(template.length - 1));
+
+            row[0] = "ly";
+            row[1] = "b1";
+            row[2] = "b1";
+            row[3] = nePop / max  >= level ? "ne" : "b2";
+            row[4] = "b3";
+            row[5] = "b3";
+            row[6] = miPop / max  >= level ? "mi" : "b4";
+            row[7] = "b5";
+            row[8] = "b5";
+            row[9] = wePop / max  >= level ? "we" : "b6";
+            row[10] = "b7";
+            row[11] = "b7";
+            row[12] = soPop / max  >= level ? "so" : "b8";
+            row[13] = "b9";
+        }
+        for (int i = 0; i < template[0].length; i++) {
+            template[template.length - 1][i] = "lx";
+        }
+
+        builder = new TextGrid.Builder(template);
+
+        builder.setVerticalCellPadding(0).setHorizontalCellPadding(0).
+                setVerticalAlignment(TextGrid.VerticalAlign.CENTER).setHorizontalAlign(TextGrid.HorizontalAlign.CENTER).
+                setHasBorder(true).setBorderCharSet(TextGrid.Builder.BorderCharSet.HOR);
+
+        builder.putCell("ly", effectLY, "P", "o", "p", "u", "l", "a", "t", "i", "o", "n").
+                putCell("lx", effectLX, "Regions").
+                putCell("ne", effectNe, "NE", String.format("%3d ",nePop)).
+                putCell("mi", effectMi, "MI", String.format("%3d ",miPop)).
+                putCell("we", effectWe, "WE", String.format("%3d ",wePop)).
+                putCell("so", effectSo, "SO", String.format("%3d ",soPop)).
+                putCell("b1", effectBl, "").
+                putCell("b2", effectBl, "").
+                putCell("b3", effectBl, "").
+                putCell("b4", effectBl, "").
+                putCell("b5", effectBl, "").
+                putCell("b6", effectBl, "").
+                putCell("b7", effectBl, "").
+                putCell("b8", effectBl, "").
+                putCell("b9", effectBl, "");
+
+
+        grid = builder.generate();
         System.out.println(grid);
 
 
