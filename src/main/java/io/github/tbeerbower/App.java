@@ -55,47 +55,47 @@ public class App {
         System.out.println(grid);
 
 
-
-        TextEffect effectLY = new TextEffect(TextEffect.Code.BACKGROUND_BLUE);
-        TextEffect effectLX = new TextEffect(TextEffect.Code.BACKGROUND_RED);
+        TextEffect effectLY = new TextEffect(TextEffect.Code.BACKGROUND_WHITE, TextEffect.Code.BLACK);
+        TextEffect effectLX = new TextEffect(TextEffect.Code.BACKGROUND_WHITE, TextEffect.Code.BLACK);
         TextEffect effectNe = new TextEffect(TextEffect.Code.BACKGROUND_GREEN);
         TextEffect effectMi = new TextEffect(TextEffect.Code.BACKGROUND_PURPLE);
         TextEffect effectWe = new TextEffect(TextEffect.Code.BACKGROUND_YELLOW);
         TextEffect effectSo = new TextEffect(TextEffect.Code.BACKGROUND_CYAN);
         TextEffect effectBl = new TextEffect(TextEffect.Code.CYAN);
 
+        Bar[] bars = new Bar[] {
+                new Bar("NoEast", 57, effectNe),
+                new Bar("MIWest", 69, effectMi),
+                new Bar("West--", 79, effectWe),
+                new Bar("South-", 126, effectSo)
+        };
 
-        int nePop = 57;
-        int miPop = 69;
-        int wePop = 79;
-        int soPop = 126;
         double max = 130.0;
 
-        String [][] template = new String[15][14];
-        String yLabel = "Population";
+        String [][] template = new String[15][bars.length * 3 + 3 ];
 
         for (int i = 0; i < template.length - 1; i++) {
             String[] row = template[i];
             double level = 1.0 - (i / (double)(template.length - 1));
 
-            row[0] = "ly";
-            row[1] = "b1";
-            row[2] = "b1";
-            row[3] = nePop / max  >= level ? "ne" : "b2";
-            row[4] = "b3";
-            row[5] = "b3";
-            row[6] = miPop / max  >= level ? "mi" : "b4";
-            row[7] = "b5";
-            row[8] = "b5";
-            row[9] = wePop / max  >= level ? "we" : "b6";
-            row[10] = "b7";
-            row[11] = "b7";
-            row[12] = soPop / max  >= level ? "so" : "b8";
-            row[13] = "b9";
+            row[0] = "labelY";
+            row[1] = String.format("val%02d", i);
+            for (int j = 2; j < row.length - 1; j+=3) {
+                row[j] = String.format("b%02d-%02d", i, j);
+                boolean showBar = bars[j / 3].value / max >= level;
+                row[j + 1] = showBar ? bars[j / 3].label : String.format("b%02d-%02d", i, j + 1);
+                row[j + 2] = showBar ? bars[j / 3].label : String.format("b%02d-%02d", i, j + 2);
+            }
+            row[row.length - 1] = String.format("b%02d-%02d", i, row.length - 1);
         }
         for (int i = 0; i < template[0].length; i++) {
-            template[template.length - 1][i] = "lx";
+            template[template.length - 1][i] = "labelX";
         }
+
+//        for(String[] row : template) {
+//            System.out.println(Arrays.toString(row));
+//        }
+
 
         builder = new TextGrid.Builder(template);
 
@@ -103,26 +103,49 @@ public class App {
                 setVerticalAlignment(TextGrid.VerticalAlign.CENTER).setHorizontalAlign(TextGrid.HorizontalAlign.CENTER).
                 setHasBorder(true).setBorderCharSet(TextGrid.Builder.BorderCharSet.HOR);
 
-        builder.putCell("ly", effectLY, "P", "o", "p", "u", "l", "a", "t", "i", "o", "n").
-                putCell("lx", effectLX, "Regions").
-                putCell("ne", effectNe, "NE", String.format("%3d ",nePop)).
-                putCell("mi", effectMi, "MI", String.format("%3d ",miPop)).
-                putCell("we", effectWe, "WE", String.format("%3d ",wePop)).
-                putCell("so", effectSo, "SO", String.format("%3d ",soPop)).
-                putCell("b1", effectBl, "").
-                putCell("b2", effectBl, "").
-                putCell("b3", effectBl, "").
-                putCell("b4", effectBl, "").
-                putCell("b5", effectBl, "").
-                putCell("b6", effectBl, "").
-                putCell("b7", effectBl, "").
-                putCell("b8", effectBl, "").
-                putCell("b9", effectBl, "");
+        builder.putCell("labelY", effectLY, "Population in Millions".split("")).
+                putCell("labelX", effectLX, "Regions");
+
+        for (Bar bar : bars) {
+            builder.putCell(bar.label, bar.effect, "");
+        }
+        for (int i = 0; i < template.length - 1; i++) {
+            int value = (int) ((1.0 - (i / (double)(template.length - 1)) )* max);
+
+            builder.putCell(String.format("val%02d", i), effectBl, String.format("%3d", value));
+            for (int j = 0; j < template[i].length - 1; ++j) {
+                builder.putCell(String.format("b%02d-%02d", i, j), effectBl, "");
+            }
+            builder.putCell(String.format("b%02d-%02d", i, template[i].length -1), effectBl, "");
+        }
 
 
         grid = builder.generate();
         System.out.println(grid);
+    }
 
 
+    private static class Bar {
+        private final String label;
+        private final int value;
+        private final TextEffect effect;
+
+        public Bar(String label, int value, TextEffect effect) {
+            this.label = label;
+            this.value = value;
+            this.effect = effect;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public TextEffect getEffect() {
+            return effect;
+        }
     }
 }

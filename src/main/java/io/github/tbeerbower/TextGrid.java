@@ -652,6 +652,9 @@ public class TextGrid {
         }
 
         private static String centerString(String s, int width) {
+            if (s.isEmpty()) {
+                s = " ";
+            }
             return width > s.length() ?
                 format(format("%%-%ds", width), format(format("%%%ds", s.length() + (width - s.length()) / 2), s)) :
                 s.substring(0, width);
